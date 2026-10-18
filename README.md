@@ -8,9 +8,9 @@ The staged course teaches users to recognise phishing emails and fake websites, 
 
 ## Live Demo
 
-`https://<your-username>.github.io/CodeAlpha_PhishingTraining/`
+`https://244star.github.io/CodeAlpha-PhishGuard/`
 
-*(Enable GitHub Pages: Settings > Pages > Deploy from branch > `main` / root.)*
+*(To publish the demo, enable GitHub Pages in Settings > Pages and deploy from the `main` branch, root folder.)*
 
 ---
 
@@ -45,8 +45,8 @@ After completing the module, a user should be able to:
 No installation or dependencies are required.
 
 ```bash
-git clone https://github.com/<your-username>/CodeAlpha_PhishingTraining.git
-cd CodeAlpha_PhishingTraining
+git clone https://github.com/244star/CodeAlpha-PhishGuard.git
+cd CodeAlpha-PhishGuard
 ```
 
 Then open `index.html` in any modern browser, or serve it locally:
@@ -61,7 +61,7 @@ python3 -m http.server 8000
 ## Project Structure
 
 ```
-CodeAlpha_PhishingTraining/
+PhishGuard/
 ├── index.html    # the full module (HTML, CSS and JavaScript in one file)
 └── README.md
 ```
