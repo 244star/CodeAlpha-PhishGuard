@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhishGuard | Phishing Awareness Training</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --bg-soft: #111827;
+        --panel: #1f2937;
+        --panel-strong: #111827;
+        --card: #f8fafc;
+        --card-alt: #eef2ff;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #38bdf8;
+        --accent-strong: #0ea5e9;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --shadow: rgba(15, 23, 42, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(180deg, #020817 0%, #0f172a 30%, #111827 100%);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .container {
+        width: min(1100px, calc(100% - 2rem));
+        margin: 0 auto;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 1rem 0;
+      }
+
+      .brand {
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      .stage-nav {
+        flex-basis: 100%;
+        justify-content: space-between;
+        border-top: 1px solid rgba(148, 163, 184, 0.16);
+        padding-top: 0.7rem;
+      }
+
+      .stage-nav button {
+        color: var(--muted);
+        background: transparent;
+        border: 0;
+        font-weight: 600;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .stage-nav button:hover,
+      .stage-nav button:focus-visible,
+      .stage-nav button[aria-current="step"] {
+        color: white;
+        background: rgba(56, 189, 248, 0.12);
+        outline: none;
+      }
+
+      .stage-nav button.is-complete::before {
+        content: "✓ ";
+        color: var(--success);
+      }
+
+      .game-status {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+      }
+
+      .xp-display {
+        border: 1px solid rgba(56, 189, 248, 0.28);
+        border-radius: 999px;
+        padding: 0.35rem 0.75rem;
+        color: #bae6fd;
+        font-weight: 800;
+      }
+
+      .sound-toggle {
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 999px;
+        padding: 0.4rem 0.75rem;
+        color: var(--text);
+        background: rgba(148, 163, 184, 0.1);
+        cursor: pointer;
+      }
+
+      .stage-progress {
+        height: 5px;
+        background: rgba(148, 163, 184, 0.15);
+      }
+
+      .stage-progress span {
+        display: block;
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, var(--accent), var(--success));
+        transition: width 0.35s ease;
+      }
+
+      main {
+        padding: 2rem 0 4rem;
+      }
+
+      main > .module-stage {
+        display: none;
+      }
+
+      main > .module-stage.is-current {
+        display: block;
+        animation: stage-arrive 0.35s ease both;
+      }
+
+      @keyframes stage-arrive {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .stage-controls {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .stage-controls .button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .xp-toast {
+        position: fixed;
+        z-index: 20;
+        right: 1.25rem;
+        bottom: 1.25rem;
+        padding: 0.8rem 1rem;
+        border: 1px solid rgba(34, 197, 94, 0.45);
+        border-radius: 14px;
+        background: #052e16;
+        color: #bbf7d0;
+        font-weight: 800;
+        opacity: 0;
+        transform: translateY(10px);
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .xp-toast.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .hero {
+        padding: 3rem 0 2rem;
+      }
+
+      .hero-card {
+        background: linear-gradient(135deg, rgba(15, 118, 110, 0.18), rgba(14, 165, 233, 0.12));
+        border: 1px solid rgba(56, 189, 248, 0.22);
+        border-radius: 24px;
+        padding: clamp(1.5rem, 2vw, 2.5rem);
+        box-shadow: 0 30px 60px var(--shadow);
+      }
+
+      .eyebrow {
+        display: inline-block;
+        background: rgba(56, 189, 248, 0.14);
+        color: #bae6fd;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        border-radius: 999px;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(2.2rem, 5vw, 4rem);
+        line-height: 1.1;
+        margin: 1rem 0 0.75rem;
+      }
+
+      .lead {
+        max-width: 700px;
+        color: #dbeafe;
+        font-size: 1.08rem;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .stat {
+        background: rgba(15, 23, 42, 0.55);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 18px;
+        padding: 1rem 1.1rem;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+
+      .stat:hover,
+      .tactic:hover,
+      .story-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(56, 189, 248, 0.42);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 1.6rem;
+        color: white;
+      }
+
+      .section {
+        padding-top: 2.3rem;
+      }
+
+      .section-heading {
+        margin-bottom: 1.2rem;
+      }
+
+      .section-heading h2 {
+        margin: 0;
+        font-size: clamp(1.8rem, 3vw, 2.5rem);
+      }
+
+      .section-heading p {
+        margin: 0.5rem 0 0;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.25rem;
+      }
+
+      .panel {
+        background: rgba(17, 24, 39, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 20px;
+        padding: 1.2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+      }
+
+      .email-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
+        gap: 1.2rem;
+      }
+
+      .mail {
+        background: #f8fafc;
+        color: #1f2937;
+        border-radius: 18px;
+        padding: 1rem;
+        border: 1px solid #dbeafe;
+      }
+
+      .mail-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 0.8rem;
+        margin-bottom: 1rem;
+        color: #334155;
+      }
+
+      .mail-label {
+        font-weight: 700;
+        color: #475569;
+      }
+
+      .mail-body h3 {
+        margin-top: 0;
+        color: #0f172a;
+      }
+
+      .mail-body p {
+        margin: 0.8rem 0;
+      }
+
+      .clickable {
+        display: inline-block;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        padding: 0.1rem 0.25rem;
+      }
+
+      .clickable:hover,
+      .clickable:focus-visible {
+        background: rgba(250, 204, 21, 0.18);
+        outline: none;
+      }
+
+      .clickable.is-active {
+        background: rgba(239, 68, 68, 0.13);
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.5);
+        color: #7f1d1d;
+      }
+
+      .mail-actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+      }
+
+      .button {
+        border: 0;
+        border-radius: 999px;
+        padding: 0.7rem 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.15s ease, opacity 0.2s ease;
+      }
+
+      .button:hover,
+      .button:focus-visible {
+        transform: translateY(-1px);
+        outline: none;
+      }
+
+      .button.primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: white;
+      }
+
+      .button.secondary {
+        background: rgba(148, 163, 184, 0.12);
+        color: var(--text);
+      }
+
+      .flag-panel {
+        background: linear-gradient(180deg, rgba(127, 29, 29, 0.12), rgba(15, 23, 42, 0.45));
+        border: 1px solid rgba(248, 113, 113, 0.25);
+        border-radius: 18px;
+        padding: 1rem;
+      }
+
+      .flag-panel h3 {
+        margin: 0 0 0.5rem;
+      }
+
+      .flag-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 0.7rem;
+      }
+
+      .flag-list li {
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(15, 23, 42, 0.45);
+        padding: 0.7rem 0.8rem;
+        color: var(--text);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .flag-list li:hover,
+      .flag-list li:focus-visible,
+      .flag-list li.is-selected {
+        border-color: rgba(239, 68, 68, 0.6);
+        background: rgba(239, 68, 68, 0.08);
+        outline: none;
+      }
+
+      .red-flag-count {
+        margin-top: 1rem;
+        font-weight: 700;
+        color: #fca5a5;
+      }
+
+      .explain {
+        margin-top: 0.9rem;
+        background: rgba(14, 165, 233, 0.08);
+        border: 1px solid rgba(14, 165, 233, 0.25);
+        border-radius: 12px;
+        padding: 0.8rem 0.9rem;
+        min-height: 74px;
+      }
+
+      .tactic-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 1rem;
+      }
+
+      .tactic {
+        background: linear-gradient(180deg, rgba(14, 165, 233, 0.08), rgba(30, 41, 59, 0.9));
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 18px;
+        padding: 1rem;
+      }
+
+      .tactic-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(14, 165, 233, 0.15);
+        font-size: 1.3rem;
+        margin-bottom: 0.65rem;
+      }
+
+      .tactic h3 {
+        margin: 0 0 0.4rem;
+        font-size: 1.1rem;
+      }
+
+      .card-list {
+        margin: 0;
+        padding-left: 1.2rem;
+        color: #dbeafe;
+      }
+
+      .fake-site {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1rem;
+      }
+
+      .browser {
+        background: #f8fafc;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid #dbeafe;
+        color: #0f172a;
+      }
+
+      .browser-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 0.9rem;
+        background: #e2e8f0;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .dot.red { background: #ef4444; }
+      .dot.yellow { background: #fbbf24; }
+      .dot.green { background: #22c55e; }
+
+      .browser-address {
+        flex: 1;
+        background: white;
+        border-radius: 999px;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.85rem;
+        color: #475569;
+        text-align: center;
+      }
+
+      .browser-content {
+        padding: 1rem;
+      }
+
+      .browser-content h3 {
+        margin-top: 0;
+      }
+
+      .checklist {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 0.6rem;
+      }
+
+      .checklist li {
+        position: relative;
+        padding-left: 1.7rem;
+      }
+
+      .checklist li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: var(--success);
+        font-weight: 700;
+      }
+
+      .warning-box {
+        margin-top: 1rem;
+        background: rgba(245, 158, 11, 0.12);
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        color: #fef3c7;
+      }
+
+      .story-card {
+        background: rgba(17, 24, 39, 0.72);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 18px;
+        padding: 1rem;
+      }
+
+      .story-card h3 {
+        margin-top: 0;
+      }
+
+      .quiz-box {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .quiz-card {
+        background: rgba(17, 24, 39, 0.92);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 22px;
+        padding: 1.5rem;
+      }
+
+      .progress {
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .question {
+        font-size: clamp(1.2rem, 2vw, 1.8rem);
+        margin-bottom: 1rem;
+      }
+
+      .options {
+        display: grid;
+        gap: 0.8rem;
+      }
+
+      .option {
+        width: 100%;
+        text-align: left;
+        padding: 0.9rem 1rem;
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 12px;
+        color: var(--text);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .option:hover,
+      .option:focus-visible {
+        border-color: rgba(56, 189, 248, 0.5);
+        background: rgba(56, 189, 248, 0.08);
+        outline: none;
+      }
+
+      .option.correct {
+        border-color: rgba(34, 197, 94, 0.8);
+        background: rgba(34, 197, 94, 0.12);
+      }
+
+      .option.wrong {
+        border-color: rgba(239, 68, 68, 0.8);
+        background: rgba(239, 68, 68, 0.12);
+      }
+
+      .quiz-feedback {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        background: rgba(148, 163, 184, 0.08);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        display: none;
+      }
+
+      .quiz-feedback.visible {
+        display: block;
+      }
+
+      .final-score {
+        display: none;
+      }
+
+      .final-score.visible {
+        display: block;
+      }
+
+      .score-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.7rem 1rem;
+        font-size: 1.2rem;
+        font-weight: 800;
+        border-radius: 999px;
+        background: rgba(34, 197, 94, 0.14);
+        color: #bbf7d0;
+      }
+
+      footer {
+        padding: 2rem 0 3rem;
+        text-align: center;
+        color: var(--muted);
+      }
+
+      @media (max-width: 700px) {
+        .topbar {
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 0.9rem 0;
+        }
+
+        .email-shell {
+          grid-template-columns: 1fr;
+        }
+
+        .stage-nav {
+          justify-content: flex-start;
+          overflow-x: auto;
+          flex-wrap: nowrap;
+          padding-bottom: 0.25rem;
+        }
+
+        .stage-nav button {
+          flex: 0 0 auto;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container topbar">
+        <div class="brand">PhishGuard</div>
+        <div class="game-status">
+          <span class="xp-display" aria-label="Experience points"><span id="xp-count">0</span> XP</span>
+          <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="false">Sound off</button>
+        </div>
+        <nav class="stage-nav" id="stage-nav" aria-label="Training stages"></nav>
+      </div>
+      <div class="stage-progress" role="progressbar" aria-label="Training progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span id="stage-progress-fill"></span>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero module-stage is-current" data-stage-title="Welcome">
+        <div class="hero-card">
+          <span class="eyebrow">CodeAlpha Task 2</span>
+          <h1>Learn how to recognise a phishing attack before it steals your data.</h1>
+          <p class="lead">
+            Attackers use urgency, trust, clever branding, and manipulation to push people into clicking links,
+            entering passwords, or installing malware. This activity helps you spot the warning signs early.
+          </p>
+
+          <div class="stats">
+            <div class="stat">
+              <strong>5</strong>
+              Common red flags
+            </div>
+            <div class="stat">
+              <strong>6</strong>
+              Quick quiz questions
+            </div>
+            <div class="stat">
+              <strong>1</strong>
+              Safer habit to build
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="spot-the-phish" class="section module-stage" data-stage-title="Spot the phish">
+        <div class="section-heading">
+          <h2>Spot the phish</h2>
+          <p>Click the suspicious parts of the email to reveal its red flags and why they matter.</p>
+        </div>
+
+        <div class="email-shell">
+          <div class="mail" aria-live="polite">
+            <div class="mail-header">
+              <div>
+                <div class="mail-label">From</div>
+                <span class="clickable suspicious" data-f="sender" tabindex="0" role="button">security-alert@bankofamerica-update.com</span>
+              </div>
+              <div>
+                <div class="mail-label">Date</div>
+                <span>18 Oct 2026</span>
+              </div>
+            </div>
+
+            <div class="mail-body">
+              <h3>URGENT ACTION REQUIRED</h3>
+              <p>
+                <span class="clickable suspicious" data-f="greeting" tabindex="0" role="button">Dear customer</span>, we noticed unusual activity on your account and need to confirm your identity to avoid account
+                suspension. Please click <span class="clickable suspicious" data-f="link" tabindex="0" role="button">secure-login-now.bankofamerica-update.com</span>
+                immediately and update your profile information.
+              </p>
+              <p>
+                This request is time-sensitive and must be completed within <span class="clickable suspicious" data-f="urgency" tabindex="0" role="button">2 hours</span>.
+                <span class="clickable suspicious" data-f="verification" tabindex="0" role="button">If you do not comply, your access may be restricted.</span>
+              </p>
+              <p>
+                We value your trust, and our security team is monitoring your account. Please do not ignore this message.
+              </p>
+              <div class="mail-actions">
+                <button class="button primary" type="button">Review account</button>
+                <button class="button secondary" type="button">Ignore for now</button>
+              </div>
+            </div>
+          </div>
+
+          <aside class="flag-panel" aria-live="polite">
+            <h3>Red flags</h3>
+            <ul class="flag-list" aria-label="Red flag list">
+              <li tabindex="0" data-f="sender">Suspicious sender address</li>
+              <li tabindex="0" data-f="link">Fake login link</li>
+              <li tabindex="0" data-f="urgency">Pressure and urgency</li>
+              <li tabindex="0" data-f="greeting">Generic greeting</li>
+              <li tabindex="0" data-f="verification">Request to bypass official process</li>
+            </ul>
+            <div class="red-flag-count">Found: <span id="flag-count">0</span> / 5</div>
+            <div id="flag-explain" class="explain" aria-live="polite">
+              Click the highlighted elements or the red-flag items to reveal what makes them suspicious.
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="social-engineering" class="section module-stage" data-stage-title="Manipulation">
+        <div class="section-heading">
+          <h2>How attackers manipulate you</h2>
+          <p>Phishing works because it plays on emotions and trust.</p>
+        </div>
+
+        <div class="tactic-grid">
+          <article class="tactic">
+            <div class="tactic-icon">⏱️</div>
+            <h3>Urgency</h3>
+            <p>“Act now or your account will be closed.” This pushes people to react before they stop and think.</p>
+          </article>
+          <article class="tactic">
+            <div class="tactic-icon">👔</div>
+            <h3>Authority</h3>
+            <p>Attackers pose as bank staff, IT support, or senior leaders to make instructions feel legitimate.</p>
+          </article>
+          <article class="tactic">
+            <div class="tactic-icon">😨</div>
+            <h3>Fear</h3>
+            <p>Threats of suspension, legal action, or losses trigger stress and reduce careful thinking.</p>
+          </article>
+          <article class="tactic">
+            <div class="tactic-icon">🎁</div>
+            <h3>Reward</h3>
+            <p>Promises like bonuses, prizes, or refunds lure people into quick clicks and false trust.</p>
+          </article>
+          <article class="tactic">
+            <div class="tactic-icon">🤝</div>
+            <h3>Familiarity</h3>
+            <p>Attackers copy logos, language, and tone from brands people already know and trust.</p>
+          </article>
+          <article class="tactic">
+            <div class="tactic-icon">📱</div>
+            <h3>Smishing & vishing</h3>
+            <p>SMS and phone calls can be just as convincing as email, especially when they use a false sense of urgency.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="fake-websites" class="section module-stage" data-stage-title="Fake sites">
+        <div class="section-heading">
+          <h2>Recognising fake websites</h2>
+          <p>Look beyond the logo. Trustworthy websites use legitimate domains and careful security cues.</p>
+        </div>
+
+        <div class="fake-site">
+          <div class="browser" aria-label="Authentic website example">
+            <div class="browser-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <div class="browser-address">bankofamerica.com</div>
+            </div>
+            <div class="browser-content">
+              <h3>Legitimate</h3>
+              <ul class="checklist">
+                <li>Domain matches the real organisation exactly</li>
+                <li>HTTPS and valid security certificate</li>
+                <li>Consistent branding and page layout</li>
+                <li>Links route to the official site</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="browser" aria-label="Fake website example">
+            <div class="browser-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <div class="browser-address">bankofamerica-update.com</div>
+            </div>
+            <div class="browser-content">
+              <h3>Look-alike scam</h3>
+              <ul class="checklist">
+                <li>Typo-squatting or extra words in the domain</li>
+                <li>Urgent warning messages or fake verification forms</li>
+                <li>Suspicious login page asking for credentials</li>
+                <li>Padlock alone does not prove legitimacy</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <strong>Key rule:</strong> If a website asks for a password, code, or payment details unexpectedly, verify it by visiting the official site yourself instead of using the link in the message.
+        </div>
+      </section>
+
+      <section id="examples" class="section module-stage" data-stage-title="Case studies">
+        <div class="section-heading">
+          <h2>Real-world examples</h2>
+          <p>Attackers often reuse the same tricks across email, social media, and phone calls.</p>
+        </div>
+
+        <div class="grid">
+          <article class="story-card">
+            <h3>Twitter 2020 vishing attack</h3>
+            <p>Attackers impersonated employees and used social engineering to trick staff into handing over account access.</p>
+          </article>
+          <article class="story-card">
+            <h3>Google and Facebook invoice fraud</h3>
+            <p>Scammers impersonated vendors and created fake invoices that looked legitimate, leading to large wire transfers.</p>
+          </article>
+          <article class="story-card">
+            <h3>2016 US campaign email</h3>
+            <p>A phishing email used a familiar style and urgent language to lure people into clicking malicious links.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="best-practices" class="section module-stage" data-stage-title="Safety playbook">
+        <div class="section-heading">
+          <h2>Best practices</h2>
+          <p>Security is mostly about slowing down, verifying, and using strong defaults.</p>
+        </div>
+
+        <ul class="card-list">
+          <li>Pause before you click: stop, inspect the sender, and check the domain.</li>
+          <li>Use MFA and a password manager so stolen credentials are less valuable.</li>
+          <li>Verify unusual requests by contacting the organisation through its official website or phone number.</li>
+          <li>Report suspicious emails or texts to your security team or service provider.</li>
+          <li>If you clicked a suspicious link, disconnect from the network, run a malware scan, and change your passwords.</li>
+        </ul>
+      </section>
+
+      <section id="quiz" class="section module-stage" data-stage-title="Final quiz">
+        <div class="section-heading">
+          <h2>Quick quiz</h2>
+          <p>Test what you learned and identify the safest next step.</p>
+        </div>
+
+        <div class="quiz-box">
+          <div class="quiz-card">
+            <div id="quiz-content" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Built for phishing awareness training • Learn before you click.
+    </footer>
+
+    <script>
+      const stages = [...document.querySelectorAll('main > .module-stage')];
+      const stageNav = document.getElementById('stage-nav');
+      const progressBar = document.querySelector('.stage-progress');
+      const progressFill = document.getElementById('stage-progress-fill');
+      const xpCount = document.getElementById('xp-count');
+      const soundToggle = document.getElementById('sound-toggle');
+      const xpToast = document.createElement('div');
+      const completedStages = new Set();
+      let currentStage = 0;
+      let xp = 0;
+      let soundEnabled = false;
+      let audioContext;
+
+      xpToast.className = 'xp-toast';
+      xpToast.setAttribute('role', 'status');
+      xpToast.setAttribute('aria-live', 'polite');
+      document.body.appendChild(xpToast);
+
+      function playTone(frequency) {
+        if (!soundEnabled) return;
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+
+        audioContext = audioContext || new AudioContextClass();
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+        gain.gain.setValueAtTime(0.08, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.16);
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.16);
+      }
+
+      function showToast(message) {
+        xpToast.textContent = message;
+        xpToast.classList.add('is-visible');
+        window.clearTimeout(showToast.timeoutId);
+        showToast.timeoutId = window.setTimeout(() => xpToast.classList.remove('is-visible'), 1800);
+      }
+
+      function awardXP(amount, message) {
+        xp += amount;
+        xpCount.textContent = String(xp);
+        showToast(message);
+        playTone(740);
+      }
+
+      function completeStage(index) {
+        if (completedStages.has(index)) return;
+        completedStages.add(index);
+        stageNav.querySelectorAll('button')[index]?.classList.add('is-complete');
+        awardXP(25, 'Stage complete +25 XP');
+      }
+
+      function setStage(index) {
+        if (index < 0 || index >= stages.length) return;
+        currentStage = index;
+
+        stages.forEach((stage, stageIndex) => {
+          const isCurrent = stageIndex === currentStage;
+          stage.classList.toggle('is-current', isCurrent);
+          stage.setAttribute('aria-hidden', String(!isCurrent));
+          if (isCurrent) stage.removeAttribute('inert');
+          else stage.setAttribute('inert', '');
+        });
+
+        stageNav.querySelectorAll('button').forEach((button, stageIndex) => {
+          if (stageIndex === currentStage) {
+            button.setAttribute('aria-current', 'step');
+          } else {
+            button.removeAttribute('aria-current');
+          }
+        });
+
+        const percent = Math.round((currentStage / (stages.length - 1)) * 100);
+        progressFill.style.width = percent + '%';
+        progressBar.setAttribute('aria-valuenow', String(percent));
+        progressBar.setAttribute('aria-valuetext', stages[currentStage].dataset.stageTitle + ', ' + percent + '%');
+        window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      }
+
+      stages.forEach((stage, index) => {
+        const title = stage.dataset.stageTitle;
+        const navButton = document.createElement('button');
+        navButton.type = 'button';
+        navButton.textContent = title;
+        navButton.setAttribute('aria-label', 'Go to stage ' + (index + 1) + ': ' + title);
+        navButton.addEventListener('click', () => setStage(index));
+        stageNav.appendChild(navButton);
+
+        const controls = document.createElement('div');
+        controls.className = 'stage-controls';
+        if (index > 0) {
+          const backButton = document.createElement('button');
+          backButton.type = 'button';
+          backButton.className = 'button secondary';
+          backButton.textContent = '← Previous';
+          backButton.addEventListener('click', () => setStage(index - 1));
+          controls.appendChild(backButton);
+        } else {
+          const spacer = document.createElement('span');
+          controls.appendChild(spacer);
+        }
+
+        if (index < stages.length - 1) {
+          const nextButton = document.createElement('button');
+          nextButton.type = 'button';
+          nextButton.className = 'button primary';
+          nextButton.innerHTML = (index === 0 ? 'Start training' : 'Continue') + ' <span aria-hidden="true">→</span>';
+          nextButton.addEventListener('click', () => {
+            completeStage(index);
+            setStage(index + 1);
+          });
+          controls.appendChild(nextButton);
+        }
+        stage.appendChild(controls);
+      });
+
+      soundToggle.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        soundToggle.setAttribute('aria-pressed', String(soundEnabled));
+        soundToggle.textContent = soundEnabled ? 'Sound on' : 'Sound off';
+        playTone(soundEnabled ? 660 : 440);
+      });
+
+      setStage(0);
+
+      const flagInfo = {
+        sender: 'The sender address looks official but is not. Attackers often change a domain slightly to fool the eye.',
+        link: 'The link is disguised and points to a fake site. Real banks do not ask for login details through a suspicious external address.',
+        urgency: 'The message creates a false sense of urgency to stop you from checking the email carefully.',
+        greeting: 'A real company normally addresses you by name and uses consistent messaging. Generic greetings are a common phishing signal.',
+        verification: 'The email asks you to skip normal verification channels and act immediately. That is a classic red flag.'
+      };
+
+      const clickableItems = document.querySelectorAll('.clickable.suspicious');
+      const flagListItems = document.querySelectorAll('.flag-list li');
+      const flagCount = document.getElementById('flag-count');
+      const flagExplain = document.getElementById('flag-explain');
+      const revealed = new Set();
+
+      function updateFlagStatus() {
+        const count = revealed.size;
+        flagCount.textContent = String(count);
+
+        if (count === 0) {
+          flagExplain.textContent = 'Click the highlighted elements or the red-flag items to reveal what makes them suspicious.';
+          return;
+        }
+
+        const last = [...revealed].at(-1);
+        flagExplain.textContent = flagInfo[last] || 'A phishing email often combines several warning signs at once.';
+      }
+
+      function markFlag(key) {
+        if (!key || revealed.has(key)) return;
+        revealed.add(key);
+        const matched = document.querySelectorAll('[data-f="' + key + '"]');
+        matched.forEach((item) => item.classList.add('is-active'));
+
+        flagListItems.forEach((item) => {
+          if (item.dataset.f === key) {
+            item.classList.add('is-selected');
+          }
+        });
+
+        updateFlagStatus();
+        awardXP(10, 'Red flag found +10 XP');
+        if (revealed.size === 5) {
+          showToast('Badge earned: Signal spotter!');
+          playTone(880);
+        }
+      }
+
+      clickableItems.forEach((item) => {
+        item.addEventListener('click', () => {
+          markFlag(item.dataset.f);
+        });
+
+        item.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            markFlag(item.dataset.f);
+          }
+        });
+      });
+
+      flagListItems.forEach((item) => {
+        item.addEventListener('click', () => {
+          markFlag(item.dataset.f);
+        });
+
+        item.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            markFlag(item.dataset.f);
+          }
+        });
+      });
+
+      const questions = [
+        {
+          q: 'What is the safest action when you receive an unexpected security email?',
+          o: [
+            'Click the link immediately to check your account',
+            'Ignore it, because all security emails are fake',
+            'Open the official website or app yourself and verify the message there',
+            'Reply with your password to confirm ownership'
+          ],
+          a: 2,
+          w: 'The safest move is to verify through the official website or app, not through a link in the message.'
+        },
+        {
+          q: 'Why do attackers use urgent wording like “act now” or “your account will be locked”?',
+          o: [
+            'To make the message feel legitimate and encourage quick action',
+            'Because all banks use a 2-hour deadline for every email',
+            'Because they want you to check the sender before reading the message',
+            'Because it keeps your email provider from marking it as spam'
+          ],
+          a: 0,
+          w: 'Urgency is a manipulation tactic that reduces the chance that someone will pause to verify details.'
+        },
+        {
+          q: 'Which domain is most likely to be a phishing attempt?',
+          o: [
+            'bankofamerica.com',
+            'paypa1.com',
+            'google.com',
+            'microsoft.com'
+          ],
+          a: 1,
+          w: 'A look-alike domain such as a letter swap is a classic phishing trick. It strongly suggests impersonation.'
+        },
+        {
+          q: 'What should you do if you clicked a suspicious link?',
+          o: [
+            'Immediately change your passwords and run a security scan',
+            'Open the same link again in a private window',
+            'Forward the message to everyone in your contact list',
+            'Do nothing, because the click was harmless'
+          ],
+          a: 0,
+          w: 'If you click a suspicious link, reduce the damage fast: change passwords, review accounts, and scan for malware.'
+        },
+        {
+          q: 'Why is “Dear customer” or a generic greeting a warning sign?',
+          o: [
+            'It means the sender has no data about you and may be sending mass phishing messages',
+            'It proves the message is from a legitimate government agency',
+            'It only happens when the email is from a bank',
+            'It is mandatory in all exception alerts'
+          ],
+          a: 0,
+          w: 'Generic greetings often point to mass phishing, where the attacker does not know your actual details.'
+        },
+        {
+          q: 'Which practice is most helpful in staying safe online?',
+          o: [
+            'Using a password manager and MFA',
+            'Clicking every email from a trusted-looking brand',
+            'Sharing one-time codes with “security” staff',
+            'Trusting any site with a padlock icon'
+          ],
+          a: 0,
+          w: 'Using a password manager and MFA reduces the impact of phishing and makes stolen credentials less useful.'
+        }
+      ];
+
+      const quizContainer = document.getElementById('quiz-content');
+      let currentQuestion = 0;
+      let score = 0;
+      let answered = false;
+      let quizCompleted = false;
+      const quizEarnedQuestions = new Set();
+
+      function renderQuestion() {
+        answered = false;
+        const item = questions[currentQuestion];
+        const questionNumber = currentQuestion + 1;
+
+        quizContainer.innerHTML = `
+          <div class="progress">Question ${questionNumber} of ${questions.length}</div>
+          <div class="question">${item.q}</div>
+          <div class="options">
+            ${item.o.map((option, index) => `
+              <button class="option" type="button" data-index="${index}">${option}</button>
+            `).join('')}
+          </div>
+          <div class="quiz-feedback" id="quiz-feedback"></div>
+          <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+            <button class="button primary" type="button" id="next-btn" style="display: none;">Next question</button>
+          </div>
+        `;
+
+        quizContainer.querySelectorAll('.option').forEach((button) => {
+          button.addEventListener('click', () => {
+            if (answered) return;
+            answered = true;
+
+            const selectedIndex = Number(button.dataset.index);
+            const correctIndex = item.a;
+            const buttons = quizContainer.querySelectorAll('.option');
+
+            buttons.forEach((btn) => {
+              const btnIndex = Number(btn.dataset.index);
+              if (btnIndex === correctIndex) {
+                btn.classList.add('correct');
+              }
+              if (btnIndex === selectedIndex && selectedIndex !== correctIndex) {
+                btn.classList.add('wrong');
+              }
+              btn.disabled = true;
+            });
+
+            const feedback = quizContainer.querySelector('#quiz-feedback');
+            feedback.classList.add('visible');
+            if (selectedIndex === correctIndex) {
+              score += 1;
+              if (!quizEarnedQuestions.has(currentQuestion)) {
+                quizEarnedQuestions.add(currentQuestion);
+                awardXP(20, 'Correct answer +20 XP');
+              }
+              playTone(880);
+              feedback.innerHTML = '<strong>Correct.</strong> ' + item.w;
+            } else {
+              playTone(220);
+              feedback.innerHTML = '<strong>Not quite.</strong> ' + item.w;
+            }
+
+            const nextBtn = quizContainer.querySelector('#next-btn');
+            nextBtn.style.display = 'inline-flex';
+            nextBtn.addEventListener('click', () => {
+              currentQuestion += 1;
+              if (currentQuestion < questions.length) {
+                renderQuestion();
+              } else {
+                showFinalScore();
+              }
+            });
+          });
+        });
+      }
+
+      function showFinalScore() {
+        const percentage = Math.round((score / questions.length) * 100);
+        if (!quizCompleted) {
+          quizCompleted = true;
+          completeStage(stages.length - 1);
+          if (percentage >= 80) showToast('Badge earned: Phishing pro!');
+        }
+        quizContainer.innerHTML = `
+          <div class="final-score visible">
+            <div class="score-pill">Score: ${score} / ${questions.length}</div>
+            <h3 style="margin-top: 1rem;">You scored ${percentage}%.</h3>
+            <p>${percentage >= 80 ? 'Excellent. You are spotting the warning signs quickly.' : 'Nice effort. Review the red flags and try again to sharpen your instincts.'}</p>
+            <button class="button primary" type="button" id="retry-btn">Retry quiz</button>
+          </div>
+        `;
+
+        quizContainer.querySelector('#retry-btn').addEventListener('click', () => {
+          currentQuestion = 0;
+          score = 0;
+          quizCompleted = false;
+          renderQuestion();
+        });
+      }
+
+      renderQuestion();
+    </script>
+  </body>
+</html>
